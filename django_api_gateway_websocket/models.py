@@ -4,7 +4,7 @@ from django.db import models
 
 
 class WebSocketOnlineDevice(models.Model):
-    provider_id = models.IntegerField()
+    channel = models.CharField(max_length=64, default="", blank=True)
     device_id = models.CharField(max_length=64)
     user_id = models.CharField(max_length=64)
     registered_datetime = models.DateTimeField(auto_now_add=True)
