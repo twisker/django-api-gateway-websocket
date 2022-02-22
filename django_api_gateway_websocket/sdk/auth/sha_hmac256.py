@@ -23,9 +23,9 @@ import hashlib
 import base64
 
 
-def sign(source, secret):
-    h = hmac.new(secret, source, hashlib.sha256)
-    signature = base64.encodestring(h.digest()).strip()
+def sign(source: str, secret: str):
+    h = hmac.new(secret.encode("utf-8"), source.encode("utf-8"), hashlib.sha256)
+    signature = base64.encodebytes(h.digest()).strip()
     return signature
 
 

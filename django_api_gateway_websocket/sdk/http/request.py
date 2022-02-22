@@ -1,4 +1,4 @@
-from com.aliyun.api.gateway.sdk.common import constant
+from django_api_gateway_websocket.sdk.common import constant
 
 class Request:
     content_md5 = "Content-MD5"

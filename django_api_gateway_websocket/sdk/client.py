@@ -18,11 +18,11 @@
 # coding=utf-8
 
 import json
-from com.aliyun.api.gateway.sdk.util import UUIDUtil, DateUtil
-from com.aliyun.api.gateway.sdk.http.request import Request
-from com.aliyun.api.gateway.sdk.http.response import Response
-from com.aliyun.api.gateway.sdk.common import constant
-from com.aliyun.api.gateway.sdk.auth import md5_tool, signature_composer, sha_hmac256
+from .util import UUIDUtil, DateUtil
+from .http.request import Request
+from .http.response import Response
+from .common import constant
+from .auth import md5_tool, signature_composer, sha_hmac256
 
 
 class DefaultClient:
@@ -39,7 +39,7 @@ class DefaultClient:
             response = Response(host=request.get_host(), url=request.get_url(), method=request.get_method(),
                                 headers=headers, protocol=request.get_protocol(), content_type=request.get_content_type(),
                                 content=request.get_body(), time_out=request.get_time_out())
-            if response.get_ssl_enable():
+            if response.get_ssl_enabled():
                 return response.get_https_response()
             else:
                 return response.get_http_response()
