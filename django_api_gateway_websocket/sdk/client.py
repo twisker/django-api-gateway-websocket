@@ -54,7 +54,7 @@ class DefaultClient:
         headers[constant.X_CA_TIMESTAMP] = DateUtil.get_timestamp()
         headers[constant.X_CA_KEY] = self.__app_key
 
-        body = request.get_body();
+        body = request.get_body()
 
         headers[constant.X_CA_NONCE] = UUIDUtil.get_uuid()
 

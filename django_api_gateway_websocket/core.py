@@ -31,6 +31,17 @@ class WebSocketProvider(object):
     def post(self, host, url, data=None, headers=None):
         req_post = Request(host=host, url=url, protocol=constant.HTTP, method="POST", time_out=30000)
         if data is not None:
+            if type(data) is str:
+                data = data.encode("utf-8")
+            if type(data) is dict:
+                kv_pairs = {}
+                for k, v in data.items():
+                    if type(k) is str:
+                        k = k.encode("utf-8")
+                    if type(v) is str:
+                        v = v.encode("utf-8")
+                    kv_pairs[k] = v
+                data = kv_pairs
             req_post.set_body(data)
         if headers is not None:
             req_post.set_headers(headers)

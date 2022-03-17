@@ -49,7 +49,7 @@ class Response(Request):
         if self.__port is None or self.__port == "":
             self.__port = 80
         try:
-            self.__connection = httplib.HTTPConnection(self.parse_host(), self.__port)
+            self.__connection = httplib.HTTPConnection(self.get_host(), self.__port)
             self.__connection.connect()
             post_data = None
             if self.get_content_type() == constant.CONTENT_TYPE_FORM and self.get_body():
