@@ -16,7 +16,7 @@ class DjangoAPIGatewayWSTestCase(TestCase):
         notify_host = "93bbada9a26c41e7adfe1fdac253b397-cn-hangzhou.alicloudapi.com"
         notify_url = "/sendUserInfo/"
         client = WebSocketProvider(app_key, app_secret, notify_host, notify_url)
-        client.post(notify_host, notify_url, data={
+        client.post(notify_url, data={
             "from": 0,
             "message": "test"
         }, headers={
