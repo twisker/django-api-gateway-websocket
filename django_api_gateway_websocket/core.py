@@ -3,8 +3,9 @@ import hashlib
 import hmac
 import json as json_lib
 import time
+import urllib.parse
 import uuid
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlsplit
 from requests import Request, Session, PreparedRequest
 from .models import WebSocketOnlineDevice
 
@@ -192,6 +193,31 @@ class WebSocketProvider(object):
         return instance
 
     def post(self, url, data=None, json=None, headers=None):
+        self.__post_with_sdk(url, data=data, json=json, headers=headers)
+
+    def __post_with_sdk(self, url, data=None, json=None, headers=None):
+        from .sdk.http import request
+        from .sdk import client
+        cli = client.DefaultClient(app_key=self.__AG_APP_KEY, app_secret=self.__AG_APP_SECRET)
+        scheme, netloc, path, query, fragment = urllib.parse.urlsplit(url)
+        url = path
+        if query is not None and len(query) > 0:
+            url += f"?{query}"
+        if fragment is not None and len(fragment) > 0:
+            url += f"#{fragment}"
+        req_post = request.Request(host=netloc, protocol=HTTP, url=url, method="POST", time_out=30000)
+        body = {}
+        if data is not None:
+            body = data
+        elif json is not None:
+            body = json
+        req_post.set_body(bytearray(source=json_lib.dumps(body), encoding="utf8"))
+        req_post.set_content_type(CONTENT_TYPE_STREAM)
+        if headers:
+            req_post.set_headers(headers)
+        print(cli.execute(req_post))
+
+    def __post_with_requests(self, url, data=None, json=None, headers=None):
         session = Session()
         req_post = Request(POST, url=url, json=json, data=data, headers=headers)
         prepared = req_post.prepare()
