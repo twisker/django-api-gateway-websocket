@@ -1,7 +1,7 @@
 import base64
 import hashlib
 import hmac
-import json
+import json as json_lib
 import time
 import uuid
 from urllib.parse import parse_qs
@@ -112,6 +112,12 @@ def _sign(source: str, secret: str):
     return signature.decode("ascii")
 
 
+def _md5(content):
+    m = hashlib.md5()
+    m.update(content)
+    return base64.encodebytes(m.digest()).strip().decode("ascii")
+
+
 class WebSocketProvider(object):
 
     def __init__(self, app_key, app_secret, notify_url):
@@ -139,9 +145,7 @@ class WebSocketProvider(object):
         string_to_sign.append(lf)
         if HTTP_HEADER_CONTENT_TYPE in headers and headers[HTTP_HEADER_CONTENT_TYPE]:
             string_to_sign.append(headers[HTTP_HEADER_CONTENT_TYPE])
-            if headers[HTTP_HEADER_CONTENT_TYPE] == CONTENT_TYPE_JSON:
-                body_dict = json.loads(body)
-            elif headers[HTTP_HEADER_CONTENT_TYPE] == CONTENT_TYPE_FORM:
+            if headers[HTTP_HEADER_CONTENT_TYPE] == CONTENT_TYPE_FORM:
                 body_dict = parse_qs(body)
 
         string_to_sign.append(lf)
@@ -163,7 +167,14 @@ class WebSocketProvider(object):
         if not HTTP_HEADER_ACCEPT in request.headers:
             request.headers[HTTP_HEADER_ACCEPT] = CONTENT_TYPE_JSON
         request.headers[X_CA_SIGNATURE_METHOD] = "HmacSHA256"
-        str_to_sign = self.build_sign_str(uri=request.url, method=request.method, headers=request.headers, body=request.body)
+        if request.body is not None and len(request.body) > 0 and \
+                not request.headers[HTTP_HEADER_CONTENT_TYPE] == CONTENT_TYPE_FORM:
+            request.headers[HTTP_HEADER_CONTENT_MD5] = _md5(request.body)
+        str_to_sign = self.build_sign_str(uri=request.path_url, method=request.method,
+                                          headers=request.headers, body=request.body)
+        print("==============================================")
+        print(str_to_sign)
+        print("==============================================")
         request.headers[X_CA_SIGNATURE] = _sign(str_to_sign, self.__AG_APP_SECRET)
 
     @classmethod
@@ -180,13 +191,21 @@ class WebSocketProvider(object):
         instance.save()
         return instance
 
-    def post(self, url, data=None, headers=None):
+    def post(self, url, data=None, json=None, headers=None):
         session = Session()
-        req_post = Request(POST, url=url, data=data, headers=headers)
+        req_post = Request(POST, url=url, json=json, data=data, headers=headers)
         prepared = req_post.prepare()
+        self._logging(prepared)
+        print("-----------------------------------------------")
         self.build_signature(prepared)
+        self._logging(prepared)
         resp = session.send(prepared, timeout=3000, verify=False)
         return resp
+
+    def _logging(self, request):
+        for k, v in request.headers.items():
+            print(k, v)
+        print(request.body)
 
     def send_to_online_device_instance(self, instance, message, from_id):
         if instance is None:
