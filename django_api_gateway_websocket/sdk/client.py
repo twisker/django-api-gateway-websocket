@@ -49,8 +49,7 @@ class DefaultClient:
             raise
 
     def build_headers(self, request=None):
-        headers = dict()
-        header_params = request.get_headers()
+        headers = request.get_headers()
         headers[constant.X_CA_TIMESTAMP] = DateUtil.get_timestamp()
         headers[constant.X_CA_KEY] = self.__app_key
 
@@ -63,10 +62,8 @@ class DefaultClient:
         else:
             headers[constant.HTTP_HEADER_CONTENT_TYPE] = constant.CONTENT_TYPE_JSON
 
-        if constant.HTTP_HEADER_ACCEPT in header_params \
-                and header_params[constant.HTTP_HEADER_ACCEPT]:
-            headers[constant.HTTP_HEADER_ACCEPT] = header_params[constant.HTTP_HEADER_ACCEPT]
-        else:
+        if not (constant.HTTP_HEADER_ACCEPT in headers
+                and headers[constant.HTTP_HEADER_ACCEPT]):
             headers[constant.HTTP_HEADER_ACCEPT] = constant.CONTENT_TYPE_JSON
 
         if constant.POST == request.get_method() and constant.CONTENT_TYPE_STREAM == request.get_content_type():

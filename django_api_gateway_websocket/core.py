@@ -173,9 +173,9 @@ class WebSocketProvider(object):
             request.headers[HTTP_HEADER_CONTENT_MD5] = _md5(request.body)
         str_to_sign = self.build_sign_str(uri=request.path_url, method=request.method,
                                           headers=request.headers, body=request.body)
-        print("==============================================")
-        print(str_to_sign)
-        print("==============================================")
+        # print("==============================================")
+        # print(str_to_sign)
+        # print("==============================================")
         request.headers[X_CA_SIGNATURE] = _sign(str_to_sign, self.__AG_APP_SECRET)
 
     @classmethod
@@ -193,7 +193,8 @@ class WebSocketProvider(object):
         return instance
 
     def post(self, url, data=None, json=None, headers=None):
-        self.__post_with_sdk(url, data=data, json=json, headers=headers)
+        # return self.__post_with_sdk(url, data=data, json=json, headers=headers)
+        return self.__post_with_requests(url, data=data, json=json, headers=headers)
 
     def __post_with_sdk(self, url, data=None, json=None, headers=None):
         from .sdk.http import request
@@ -205,7 +206,7 @@ class WebSocketProvider(object):
             url += f"?{query}"
         if fragment is not None and len(fragment) > 0:
             url += f"#{fragment}"
-        req_post = request.Request(host=netloc, protocol=HTTP, url=url, method="POST", time_out=30000)
+        req_post = request.Request(host=netloc, protocol=HTTP, url=url, method="POST", time_out=30000, headers=headers)
         body = {}
         if data is not None:
             body = data
@@ -213,16 +214,13 @@ class WebSocketProvider(object):
             body = json
         req_post.set_body(bytearray(source=json_lib.dumps(body), encoding="utf8"))
         req_post.set_content_type(CONTENT_TYPE_STREAM)
-        if headers:
-            req_post.set_headers(headers)
-        print(cli.execute(req_post))
+        return cli.execute(req_post)
 
     def __post_with_requests(self, url, data=None, json=None, headers=None):
         session = Session()
         req_post = Request(POST, url=url, json=json, data=data, headers=headers)
         prepared = req_post.prepare()
         self._logging(prepared)
-        print("-----------------------------------------------")
         self.build_signature(prepared)
         self._logging(prepared)
         resp = session.send(prepared, timeout=3000, verify=False)
@@ -238,7 +236,7 @@ class WebSocketProvider(object):
             return False
         try:
             result = self.post(self.__AG_NOTIFY_URL,
-                               data={
+                               json={
                                     "from": from_id,
                                     "message": message
                                },

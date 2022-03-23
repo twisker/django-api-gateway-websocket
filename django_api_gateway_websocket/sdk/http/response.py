@@ -58,6 +58,9 @@ class Response(Request):
                 post_data = self.get_body()
             self.__connection.request(method=self.get_method(), url=self.get_url(), body=post_data,
                                       headers=self.get_headers())
+            print("AAAAAAAA")
+            print(self.get_headers())
+            print("AAAAAAAA")
             response = self.__connection.getresponse()
             return response.status, response.getheaders(), response.read()
         except Exception as e:
