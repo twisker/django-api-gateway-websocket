@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import hmac
+import logging
 import json as json_lib
 import time
 import urllib.parse
@@ -8,6 +9,9 @@ import uuid
 from urllib.parse import parse_qs, urlsplit
 from requests import Request, Session, PreparedRequest
 from .models import WebSocketOnlineDevice
+
+
+logger = logging.getLogger(__name__)
 
 
 SYSTEM_HEADERS = (
@@ -173,9 +177,9 @@ class WebSocketProvider(object):
             request.headers[HTTP_HEADER_CONTENT_MD5] = _md5(request.body)
         str_to_sign = self.build_sign_str(uri=request.path_url, method=request.method,
                                           headers=request.headers, body=request.body)
-        # print("==============================================")
-        # print(str_to_sign)
-        # print("==============================================")
+        # logger.debug("==============================================")
+        # logger.debug(str_to_sign)
+        # logger.debug("==============================================")
         request.headers[X_CA_SIGNATURE] = _sign(str_to_sign, self.__AG_APP_SECRET)
 
     @classmethod
@@ -220,16 +224,15 @@ class WebSocketProvider(object):
         session = Session()
         req_post = Request(POST, url=url, json=json, data=data, headers=headers)
         prepared = req_post.prepare()
-        self._logging(prepared)
         self.build_signature(prepared)
-        self._logging(prepared)
         resp = session.send(prepared, timeout=3000, verify=False)
         return resp
 
-    def _logging(self, request):
+    @classmethod
+    def _logging_headers(cls, request):
         for k, v in request.headers.items():
-            print(k, v)
-        print(request.body)
+            logger.debug(f"{k}, {v}")
+        logger.debug(request.body)
 
     def send_to_online_device_instance(self, instance, message, from_id):
         if instance is None:

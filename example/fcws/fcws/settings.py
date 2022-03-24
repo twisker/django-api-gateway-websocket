@@ -122,3 +122,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+WS_APP_KEY = "204036994"
+WS_APP_SECRET = "V9pcE4wZksO7Mgg2Xd17VrGbeuqbRuiU"
+WS_NOTIFY_URL = "http://93bbada9a26c41e7adfe1fdac253b397-cn-hangzhou.alicloudapi.com/sendUserInfo/"
