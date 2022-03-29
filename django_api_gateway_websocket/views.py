@@ -33,3 +33,15 @@ def api_register(request):
         "success": True,
         "device_id": device_id
     })
+
+
+@csrf_exempt
+def api_unregister(request):
+    if "x-ca-deviceid" not in request.headers:
+        return HttpResponseBadRequest("Required Header x-ca-deviceid Not Found")
+    device_id = request.headers["x-ca-deviceid"]
+    ws_provider.unregister(device_id)
+    return JsonResponse({
+        "success": True,
+        "device_id": device_id
+    })

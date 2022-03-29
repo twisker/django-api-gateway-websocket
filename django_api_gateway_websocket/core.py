@@ -196,6 +196,17 @@ class WebSocketProvider(object):
         instance.save()
         return instance
 
+    @classmethod
+    def unregister(cls, device_id):
+        for instance in WebSocketOnlineDevice.objects.filter(device_id=device_id):
+            instance.delete()
+
+    @classmethod
+    def destroy_channel(cls, channel=""):
+        for instance in cls.get_all_online_users(channel=channel):
+            # todo 是否需要先通知这个device？
+            instance.delete()
+
     def post(self, url, data=None, json=None, headers=None):
         # return self.__post_with_sdk(url, data=data, json=json, headers=headers)
         return self.__post_with_requests(url, data=data, json=json, headers=headers)
@@ -264,7 +275,3 @@ class WebSocketProvider(object):
         for instance in self.get_all_online_users(channel=channel).exclude(device_id=from_id):
             self.send_to_online_device_instance(instance, message, from_id)
 
-    def destroy(self, channel=""):
-        for instance in self.get_all_online_users(channel=channel):
-            # todo 是否需要先通知这个device？
-            instance.delete()
